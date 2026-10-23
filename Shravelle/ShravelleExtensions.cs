@@ -20,10 +20,11 @@ namespace Shravelle;
 public sealed class ShravelleOptions
 {
     public string Endpoint { get; set; } = Env("SHRAVELLE_ENDPOINT", "http://localhost:4318");
-    public string ApiKey { get; set; } = Env("SHRAVELLE_API_KEY", "");
-    public string ServiceName { get; set; } = Env("SHRAVELLE_SERVICE_NAME", Env("OTEL_SERVICE_NAME", AppDomain.CurrentDomain.FriendlyName));
-    public string ServiceVersion { get; set; } = Env("SHRAVELLE_SERVICE_VERSION", "");
-    public string Environment { get; set; } = Env("SHRAVELLE_ENV", "production");
+    public string ApiKey { get; set; } = Env("SHRAVELLE_API_KEY", Env("SHRAVELLE_LICENSE_KEY", ""));
+    public string ServiceName { get; set; } = Env("SHRAVELLE_APP_NAME", Env("SHRAVELLE_SERVICE_NAME", Env("OTEL_SERVICE_NAME", AppDomain.CurrentDomain.FriendlyName)));
+    public string ServiceVersion { get; set; } = Env("SHRAVELLE_APP_VERSION", Env("SHRAVELLE_SERVICE_VERSION", ""));
+    public string Environment { get; set; } = Env("SHRAVELLE_APP_ENV", Env("SHRAVELLE_ENV", "production"));
+    public string Organisation { get; set; } = Env("SHRAVELLE_ORGANISATION", Env("SHRAVELLE_ORGANIZATION", ""));
     public double SampleRate { get; set; } = double.TryParse(Env("SHRAVELLE_SAMPLE_RATE", "1"), out var r) ? r : 1;
     internal static string Env(string k, string d) => System.Environment.GetEnvironmentVariable(k) is { Length: > 0 } v ? v : d;
 }
@@ -49,6 +50,7 @@ public static class ShravelleExtensions
                 ["deployment.environment.name"] = o.Environment,
                 ["host.name"] = System.Environment.MachineName,
                 ["telemetry.distro.name"] = "shravelle-dotnet",
+                ["shravelle.organization"] = o.Organisation,
             });
         builder.Services.AddOpenTelemetry()
             .WithTracing(t => t.SetResourceBuilder(resource)
